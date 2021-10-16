@@ -1,6 +1,7 @@
 #ifndef USEFUL_FUNCTIONS
 #define USEFUL_FUNCTIONS
 #include <iostream>
+#include <sciml/utils/constants.hpp>
 #include <stdarg.h>
 #include <stdlib.h>
 
@@ -32,9 +33,25 @@ int *shift_right(int *arr, int l, int val) {
   return o;
 }
 
-int *args_to_list(va_list vl, int *l) {
-  int i;
+int *args_to_list(va_list vl, int first_val, int *l) {
+  int i = 0;
   int *o = (int *)malloc(sizeof(int));
+  int val = first_val;
+  while (val != END_OF_LIST) {
+    o[i++] = val;
+    o = (int *)realloc(o, sizeof(int) * (i + 1));
+    val = va_arg(vl, int);
+  }
+  *l = i;
   return o;
 }
+
+int list_dot_list(int *a, int *b, int l) {
+  int idx = 0;
+  int i;
+  for (i = 0; i < l; i++)
+    idx += a[i] * b[i];
+  return idx;
+}
+
 #endif

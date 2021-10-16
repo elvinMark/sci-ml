@@ -2,6 +2,7 @@
 #define NDARRAY
 #include <iostream>
 #include <stdarg.h>
+#include <stdlib.h>
 
 using namespace std;
 
@@ -17,6 +18,7 @@ public:
 public:
   ndarray(double *data, int size);
   ndarray *clone();
+  double at(int idx, ...);
   ndarray *get(int idx, ...);
   void set(ndarray *arr, int idx, ...);
   int *shape();
