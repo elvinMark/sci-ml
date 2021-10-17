@@ -2,5 +2,13 @@
 #define CONSTANTS
 
 #define END_OF_LIST -2
+#define FALSE 0
+#define TRUE 1
+
+#define DIM_SIZE_MISMATCH 2
+#define NOT_ENOUGH_INDEXES 3
+#define OUTSIDE_RANGE 4
+#define STRIDES_SIZE_MISMATCH 5
+#define SHAPE_SIZE_MISMATCH 6
 
 #endif

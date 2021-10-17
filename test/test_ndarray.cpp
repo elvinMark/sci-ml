@@ -1,10 +1,11 @@
 #include <sciml/data/ndarray.hpp>
+#include <sciml/data/random.hpp>
+#include <sciml/utils/useful_functions.hpp>
 
 using namespace std;
 int main() {
-  double data_[4] = {1.2, 3.4, 5.6, 6.7};
-  ndarray *d = new ndarray(data_, 4);
-  d->reshape(2, 2, END_OF_LIST);
-  cout << d->at(0, 1, -2) << endl;
+  ndarray *d = random(2, 3, -2);
+  // d->transpose();
+  cout << d->at(0, 2, -2) << endl;
   return 0;
 }

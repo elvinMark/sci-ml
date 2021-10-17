@@ -14,9 +14,12 @@ public:
   int *dim;
   int dim_length;
   int size;
+  int transpose_status;
 
 public:
   ndarray(double *data, int size);
+  ndarray(double *data, int size, int *dim, int l);
+  double flat(int idx);
   ndarray *clone();
   double at(int idx, ...);
   ndarray *get(int idx, ...);
@@ -26,6 +29,7 @@ public:
   void set_strides(int *s, int l);
   void reshape(int s, ...);
   void reshape(int *s, int l);
+  void transpose();
   ndarray *dot(ndarray *arr);
 };
 #endif
