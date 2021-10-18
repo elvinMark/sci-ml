@@ -5,6 +5,15 @@ using namespace std;
 
 int *create_list(int l) { return (int *)malloc(sizeof(int) * l); }
 
+int *random_list(int lo, int hi, int l) {
+  int *o = create_list(l);
+  int diff = (hi - lo);
+  srand(time(NULL));
+  for (int i = 0; i < l; i++)
+    o[i] = lo + (rand() % diff);
+  return o;
+}
+
 void print_list(int *arr, int l) {
   for (int i = 0; i < l; i++)
     cout << arr[i] << " ";
@@ -161,6 +170,11 @@ void assert_error(int error_code) {
     cout << "ERROR: Input shape does not match the size of the ndarray" << endl;
   else if (error_code == EXCEED_MAX_NUM_DIM)
     cout << "ERROR: Exceed the maximum number of dimensions supported" << endl;
+  else if (error_code == IDX_FMT_DIM_MISMATCH)
+    cout << "ERRO: Indexes pattern does not match dimension of the ndarray"
+         << endl;
+  else if (error_code == COMMON_IDX_SIZE_MISMATCH)
+    cout << "ERROR: Common index does not match size" << endl;
   else
     cout << "ERROR: Unknown";
   exit(-1);

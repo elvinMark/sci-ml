@@ -8,5 +8,7 @@
 
 ndarray *random(int d, ...);
 ndarray *random(int *d, int l);
+ndarray *random(double lo, double hi, int d, ...);
+ndarray *random(double lo, double hi, int *d, int l);
 
 #endif

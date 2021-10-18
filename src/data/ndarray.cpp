@@ -34,9 +34,26 @@ ndarray::ndarray(double *data, int size, int *dim, int l) {
   }
 }
 
+ndarray *ndarray::__add__(double x) {
+  // TODO
+}
+
+ndarray *ndarray::__add__(ndarray *arr) {
+  // TODO
+}
+ndarray *ndarray::__mul__(double x) {
+  // TODO
+}
+ndarray *ndarray::__mul__(ndarray *arr) {
+  // TODO
+}
+ndarray *ndarray::__div__(ndarray *arr) {
+  // TODO
+}
+
 // Convert strided index into flat index
 int ndarray::flat_index(int idx) {
-  // TODO
+  // TODO? Now it is just returning the same index;
   return idx;
 }
 
@@ -192,25 +209,10 @@ void ndarray::transpose() {
 }
 
 // Dot product
-ndarray *ndarray::dot(ndarray *arr) {
-  // TODO
-  string idx_fmt1 = "";
-  string idx_fmt2 = "";
-  char idx = 'i';
-  char tmp;
-  for (int i = 0; i < this->dim_length; i++) {
-    idx_fmt1.push_back(idx);
-    idx += 1;
-  }
-  tmp = idx - 1;
-  for (int i = 0; i < arr->dim_length; i++) {
-    idx_fmt2.push_back(idx);
-    idx += 1;
-  }
-  idx_fmt2[arr->dim_length - 2] = tmp;
+ndarray *ndarray::dot(ndarray *arr) { return ndarray::dot(this, arr); }
 
-  return ndarray::einsum(this, idx_fmt1, arr, idx_fmt2);
-}
+ndarray *ndarray::sum(int *axis) { return NULL; }
+ndarray *ndarray::sum(int axis, ...) { return NULL; }
 
 // Einstein Sum
 ndarray *ndarray::einsum(ndarray *arr1, string idx_fmt1, ndarray *arr2,
@@ -219,12 +221,12 @@ ndarray *ndarray::einsum(ndarray *arr1, string idx_fmt1, ndarray *arr2,
   if (arr1->strides_length != idx_fmt1.length() ||
       arr2->strides_length != idx_fmt2.length()) {
     // ERROR
-    exit(-1);
+    assert_error(IDX_FMT_DIM_MISMATCH);
   }
 
   if (!check_format_indexes(arr1->dim, idx_fmt1, arr2->dim, idx_fmt2)) {
     // ERROR
-    exit(-1);
+    assert_error(COMMON_IDX_SIZE_MISMATCH);
   }
 
   int sl1 = arr1->strides_length;
@@ -270,3 +272,79 @@ ndarray *ndarray::einsum(ndarray *arr1, string idx_fmt1, ndarray *arr2,
   } while (!increase_list_by_one(result_idx_iterator, new_shape, ril));
   return result_ndarray;
 }
+
+/*
+Einsum:
+arr_{idx_fmt1} 1_{idx_fmt2}
+For example:
+arr_{ijk} 1_{jk} -> a_{i} (sum over index j and k)
+*/
+ndarray *ndarray::einsum(ndarray *arr1, string idx_fmt1, string idx_fmt2) {
+  // TODO?/ FIX?
+  if (arr1->strides_length != idx_fmt1.length()) {
+    // ERROR
+    assert_error(IDX_FMT_DIM_MISMATCH);
+  }
+
+  int sl1 = arr1->strides_length;
+  int *idxs1 = create_list(sl1);
+  string result_idxs, sum_idxs;
+  einsum_format_indexes(idx_fmt1, idx_fmt2, &result_idxs, &sum_idxs);
+
+  int ril = result_idxs.length();
+  int sil = sum_idxs.length();
+  int *result_idx_iterator = create_list(ril);
+  int *sum_idx_iterator = create_list(sil);
+  int *list_indexes = create_list(AVAIL_NUM_INDEXES);
+
+  fill_zeros_list(list_indexes, AVAIL_NUM_INDEXES);
+  update_list_indexes(arr1->dim, idx_fmt1, list_indexes);
+  fill_zeros_list(result_idx_iterator, ril);
+  fill_zeros_list(sum_idx_iterator, sil);
+
+  int *new_shape = create_list_from_idx_fmt(result_idxs, list_indexes);
+  int *sum_limits = create_list_from_idx_fmt(sum_idxs, list_indexes);
+
+  int size = prod_all_elements(new_shape, ril);
+  double *data = (double *)malloc(sizeof(double) * size);
+  ndarray *result_ndarray = new ndarray(data, size, new_shape, ril);
+  double acc;
+
+  do {
+    fill_zeros_list(list_indexes, AVAIL_NUM_INDEXES);
+    update_list_indexes(result_idx_iterator, result_idxs, list_indexes);
+    acc = 0;
+    do {
+      update_list_indexes(sum_idx_iterator, sum_idxs, list_indexes);
+      update_list_from_idx_fmt(idx_fmt1, list_indexes, idxs1);
+      acc += arr1->at(idxs1, arr1->strides_length);
+    } while (!increase_list_by_one(sum_idx_iterator, sum_limits, sil));
+    result_ndarray->set(acc, result_idx_iterator, ril);
+
+  } while (!increase_list_by_one(result_idx_iterator, new_shape, ril));
+  return result_ndarray;
+}
+
+// Dot product between 2 ndarrays
+ndarray *ndarray::dot(ndarray *arr1, ndarray *arr2) {
+  // TODO? Almost done?
+  string idx_fmt1 = "";
+  string idx_fmt2 = "";
+  char idx = 'i';
+  char tmp;
+  for (int i = 0; i < arr1->dim_length; i++) {
+    idx_fmt1.push_back(idx);
+    idx += 1;
+  }
+  tmp = idx - 1;
+  for (int i = 0; i < arr2->dim_length; i++) {
+    idx_fmt2.push_back(idx);
+    idx += 1;
+  }
+  idx_fmt2[arr2->dim_length - 2] = tmp;
+
+  return ndarray::einsum(arr1, idx_fmt1, arr2, idx_fmt2);
+}
+
+ndarray *ndarray::sum(ndarray *arr1, int *axis) { return NULL; }
+ndarray *ndarray::sum(ndarray *arr1, int axis, ...) { return NULL; }

@@ -7,7 +7,7 @@
 using namespace std;
 
 class ndarray {
-private:
+public:
   double *data;
   int *strides;
   int strides_length;
@@ -19,6 +19,11 @@ private:
 public:
   ndarray(double *data, int size);
   ndarray(double *data, int size, int *dim, int l);
+  ndarray *__add__(double x);
+  ndarray *__add__(ndarray *arr);
+  ndarray *__mul__(double x);
+  ndarray *__mul__(ndarray *arr);
+  ndarray *__div__(ndarray *arr);
   double flat(int idx);
   int flat_index(int idx);
   ndarray *clone();
@@ -35,8 +40,14 @@ public:
   void reshape(int *s, int l);
   void transpose();
   ndarray *dot(ndarray *arr);
+  ndarray *sum(int *axis);
+  ndarray *sum(int axis, ...);
 
   static ndarray *einsum(ndarray *arr1, string idx_fmt1, ndarray *arr2,
                          string idx_fmt2);
+  static ndarray *einsum(ndarray *arr1, string idx_fmt1, string idx_fmt2);
+  static ndarray *dot(ndarray *arr1, ndarray *arr2);
+  static ndarray *sum(ndarray *arr1, int *axis);
+  static ndarray *sum(ndarray *arr1, int axis, ...);
 };
 #endif
