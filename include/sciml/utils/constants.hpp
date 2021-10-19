@@ -2,6 +2,7 @@
 #define CONSTANTS
 
 #define END_OF_LIST -2
+#define ALL -1
 #define FALSE 0
 #define TRUE 1
 #define MAX_NUM_DIM 5
@@ -16,4 +17,6 @@
 #define IDX_FMT_DIM_MISMATCH 8
 #define COMMON_IDX_SIZE_MISMATCH 9
 #define IDX_DIM_MISMATCH 10
+#define DIM_TOO_HIGH 11
+
 #endif

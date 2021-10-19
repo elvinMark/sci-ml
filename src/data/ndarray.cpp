@@ -11,6 +11,7 @@ ndarray::ndarray(double *data, int size) {
   this->dim[0] = size;
   this->strides = shift_left(this->dim, 1, 1);
   this->strides_length = 1;
+  this->offset = 0;
 }
 
 // Constructor of th n-dimensional array with an specific shape
@@ -43,6 +44,37 @@ ndarray *ndarray::__div__(ndarray *arr) { return ndarray::div(this, arr); }
 ndarray *ndarray::__power__(double num) { return ndarray::power(this, num); }
 ndarray *ndarray::__apply__(double fun_f(double)) {
   return ndarray::apply(this, fun_f);
+}
+
+ndarray *ndarray::__get_subndarray__(int *idxs, int l) {
+  if (l != this->dim_length) {
+    // ERROR
+    assert_error(IDX_DIM_MISMATCH);
+  }
+
+  if (!list_less_than_list(idxs, this->dim, l)) {
+    // ERROR
+    assert_error(IDX_DIM_MISMATCH);
+  }
+  ndarray *o = this->clone();
+  o->dim = reduce_list(this->dim, idxs, l);
+  o->dim_length = count_elem_list(idxs, l, ALL);
+  o->strides_length = o->dim_length;
+  o->strides = reduce_list(this->strides, idxs, l);
+  o->offset = list_dot_list(replace_elem_list(idxs, l, ALL, 0), this->dim, l);
+
+  return o;
+}
+
+void ndarray::__set_subndarray__(ndarray *arr, int *idxs, int l) {
+  ndarray *o = this->__get_subndarray__(idxs, l);
+  int *limit = o->dim;
+  int sl = o->dim_length;
+  int *iter = create_list(sl);
+  fill_zeros_list(iter, sl);
+  do {
+    o->__set__(arr->__at__(iter, sl), iter, sl);
+  } while (!increase_list_by_one(iter, o->dim, sl));
 }
 
 // Convert strided index into flat index
@@ -86,7 +118,7 @@ double ndarray::__at__(int *idxs, int l) {
     assert_error(OUTSIDE_RANGE);
   }
 
-  real_idx = list_dot_list(idxs, this->strides, l);
+  real_idx = this->offset + list_dot_list(idxs, this->strides, l);
 
   if (real_idx >= this->size) {
     // ERROR
@@ -115,14 +147,29 @@ void ndarray::__set__(double val, int *idxs, int l) {
 
 // Get the sub ndarray at the specific indexes
 ndarray *ndarray::get_subndarray(int idx, ...) {
-  // TODO
-  return NULL;
+  va_list vl;
+  int l;
+  int *idxs;
+
+  va_start(vl, idx);
+  idxs = args_to_list(vl, idx, &l);
+  va_end(vl);
+
+  return this->__get_subndarray__(idxs, l);
 }
 
 // Set values at the specific subsection of the array at the specific
 // indexes
 void ndarray::set_subndarray(ndarray *arr, int idx, ...) {
-  // TODO
+  va_list vl;
+  int l;
+  int *idxs;
+
+  va_start(vl, idx);
+  idxs = args_to_list(vl, idx, &l);
+  va_end(vl);
+
+  this->__set_subndarray__(arr, idxs, l);
 }
 
 // Get the shape of the ndarray

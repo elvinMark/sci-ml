@@ -111,6 +111,18 @@ int *shift_right(int *arr, int l, int val) {
   return o;
 }
 
+int *sublist(int lo, int hi, int *arr, int l) {
+  if (lo > hi || hi >= l) {
+    return NULL;
+  }
+  int d = (hi - lo + 1);
+  int *o = create_list(d);
+  for (int i = 0; i < d; i++)
+    o[i] = arr[i + lo];
+
+  return o;
+}
+
 int *args_to_list(va_list vl, int first_val, int *l) {
   int i = 0;
   int *o = create_list(1);
@@ -131,6 +143,30 @@ int list_dot_list(int *a, int *b, int l) {
     idx += a[i] * b[i];
 
   return idx;
+}
+
+int *replace_elem_list(int *a, int l, int prev_val, int new_val) {
+  int *o = create_list(l);
+  for (int i = 0; i < l; i++)
+    o[i] = a[i] != prev_val ? a[i] : new_val;
+  return o;
+}
+
+int count_elem_list(int *a, int l, int elem) {
+  int s = 0;
+  for (int i = 0; i < l; i++)
+    s += a[i] == elem ? 1 : 0;
+  return s;
+}
+
+int *reduce_list(int *arr, int *mask, int l) {
+  int nl = count_elem_list(mask, l, ALL);
+  int *o = create_list(nl);
+  int j = 0;
+  for (int i = 0; i < l; i++)
+    if (mask[i] == ALL)
+      o[j++] = arr[i];
+  return o;
 }
 
 int *reverse_list(int *s, int l) {
@@ -178,6 +214,8 @@ void assert_error(int error_code) {
     cout << "ERROR: Common index does not match size" << endl;
   else if (error_code == IDX_DIM_MISMATCH)
     cout << "ERROR: Index does not match the dimension of the ndarray" << endl;
+  else if (error_code == DIM_TOO_HIGH)
+    cout << "ERROR: Dimension of the ndarray is too high" << endl;
   else
     cout << "ERROR: Unknown";
   exit(-1);

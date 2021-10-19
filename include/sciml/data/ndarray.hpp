@@ -15,7 +15,7 @@ public:
   int *dim;
   int dim_length;
   int size;
-  int transpose_status;
+  int offset;
 
 public:
   ndarray(double *data, int size);
@@ -30,6 +30,8 @@ public:
   ndarray *__apply__(double fun_f(double));
   double __at__(int *idxs, int l);
   void __set__(double val, int *idxs, int l);
+  ndarray *__get_subndarray__(int *idxs, int l);
+  void __set_subndarray__(ndarray *arr, int *idxs, int l);
   void __set_strides__(int *s, int l);
   void __reshape__(int *s, int l);
   double flat(int idx);
