@@ -87,17 +87,15 @@ void update_list_from_idx_fmt(string idx_fmt, int *info, int *arr) {
 }
 
 int prod_all_elements(int *arr, int l) {
-  int i;
   int o = 1;
-  for (i = 0; i < l; i++)
+  for (int i = 0; i < l; i++)
     o *= arr[i];
   return o;
 }
 
 int *shift_left(int *arr, int l, int val) {
-  int i;
   int *o = create_list(l);
-  for (i = 0; i < l - 1; i++) {
+  for (int i = 0; i < l - 1; i++) {
     o[i] = arr[i + 1];
   }
   o[l - 1] = val;
@@ -105,9 +103,8 @@ int *shift_left(int *arr, int l, int val) {
 }
 
 int *shift_right(int *arr, int l, int val) {
-  int i;
   int *o = create_list(l);
-  for (i = 1; i < l; i++) {
+  for (int i = 1; i < l; i++) {
     o[i] = arr[i - 1];
   }
   o[0] = val;
@@ -129,26 +126,30 @@ int *args_to_list(va_list vl, int first_val, int *l) {
 
 int list_dot_list(int *a, int *b, int l) {
   int idx = 0;
-  int i;
 
-  for (i = 0; i < l; i++)
+  for (int i = 0; i < l; i++)
     idx += a[i] * b[i];
 
   return idx;
 }
 
 int *reverse_list(int *s, int l) {
-  int i;
   int *o = create_list(l);
-  for (i = 0; i < l; i++)
+  for (int i = 0; i < l; i++)
     o[i] = s[l - i - 1];
   return o;
 }
 
 int list_less_than_list(int *a, int *b, int l) {
-  int i;
-  for (i = 0; i < l; i++)
+  for (int i = 0; i < l; i++)
     if (a[i] >= b[i])
+      return FALSE;
+  return TRUE;
+}
+
+int list_equal_list(int *a, int *b, int l) {
+  for (int i = 0; i < l; i++)
+    if (a[i] != b[i])
       return FALSE;
   return TRUE;
 }
@@ -175,6 +176,8 @@ void assert_error(int error_code) {
          << endl;
   else if (error_code == COMMON_IDX_SIZE_MISMATCH)
     cout << "ERROR: Common index does not match size" << endl;
+  else if (error_code == IDX_DIM_MISMATCH)
+    cout << "ERROR: Index does not match the dimension of the ndarray" << endl;
   else
     cout << "ERROR: Unknown";
   exit(-1);

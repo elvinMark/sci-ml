@@ -17,6 +17,7 @@ int increase_list_by_one(int *arr, int *limit, int l);
 int *shift_left(int *arr, int l, int val);
 int *shift_right(int *arr, int l, int val);
 int list_less_than_list(int *a, int *b, int l);
+int list_equal_list(int *a, int *b, int l);
 int list_dot_list(int *a, int *b, int l);
 int prod_all_elements(int *arr, int l);
 int *args_to_list(va_list vl, int first_val, int *l);
