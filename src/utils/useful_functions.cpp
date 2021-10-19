@@ -20,6 +20,12 @@ void print_list(int *arr, int l) {
   cout << endl;
 }
 
+void fill_elem_list(int *arr, int l, int elem) {
+  int i;
+  for (i = 0; i < l; i++)
+    arr[i] = elem;
+}
+
 void fill_zeros_list(int *arr, int l) {
   int i;
   for (i = 0; i < l; i++)
@@ -108,6 +114,16 @@ int *shift_right(int *arr, int l, int val) {
     o[i] = arr[i - 1];
   }
   o[0] = val;
+  return o;
+}
+
+int *get_strides_from_shape(int *shape, int l) {
+  int *o = create_list(l);
+  int acc = 1;
+  for (int i = l - 1; i >= 0; i--) {
+    o[i] = acc;
+    acc *= shape[i];
+  }
   return o;
 }
 

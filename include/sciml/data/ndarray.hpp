@@ -20,6 +20,8 @@ public:
 public:
   ndarray(double *data, int size);
   ndarray(double *data, int size, int *dim, int l);
+  ndarray(double *data, int size, int *dim, int l, int offset);
+  string __str__();
   ndarray *__add__(double x);
   ndarray *__add__(ndarray *arr);
   ndarray *__sub__(ndarray *arr);
@@ -32,7 +34,7 @@ public:
   void __set__(double val, int *idxs, int l);
   ndarray *__get_subndarray__(int *idxs, int l);
   void __set_subndarray__(ndarray *arr, int *idxs, int l);
-  void __set_strides__(int *s, int l);
+  void __as_strided__(int *s, int *d, int l);
   void __reshape__(int *s, int l);
   double flat(int idx);
   int flat_index(int idx);
@@ -42,7 +44,6 @@ public:
   ndarray *get_subndarray(int idx, ...);
   void set_subndarray(ndarray *arr, int idx, ...);
   int *shape();
-  void set_strides(int s, ...);
   void reshape(int s, ...);
   void transpose();
   ndarray *dot(ndarray *arr);

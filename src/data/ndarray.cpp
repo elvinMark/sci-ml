@@ -9,7 +9,7 @@ ndarray::ndarray(double *data, int size) {
   this->dim = (int *)malloc(sizeof(int));
   this->dim_length = 1;
   this->dim[0] = size;
-  this->strides = shift_left(this->dim, 1, 1);
+  this->strides = get_strides_from_shape(this->dim, 1);
   this->strides_length = 1;
   this->offset = 0;
 }
@@ -26,12 +26,62 @@ ndarray::ndarray(double *data, int size, int *dim, int l) {
     assert_error(EXCEED_MAX_NUM_DIM);
   }
 
-  this->strides = shift_left(dim, l, 1);
+  this->strides = get_strides_from_shape(dim, l);
   this->strides_length = l;
 
   if (prod_all_elements(dim, l) != size) {
     // ERROR
     assert_error(DIM_SIZE_MISMATCH);
+  }
+}
+
+// General Constructor
+ndarray::ndarray(double *data, int size, int *dim, int l, int offset) {
+  this->data = data;
+  this->size = size;
+  this->dim = dim;
+  this->dim_length = l;
+
+  if (l > MAX_NUM_DIM) {
+    // ERROR
+    assert_error(EXCEED_MAX_NUM_DIM);
+  }
+
+  this->strides = get_strides_from_shape(dim, l);
+  this->strides_length = l;
+
+  if (prod_all_elements(dim, l) != size) {
+    // ERROR
+    assert_error(DIM_SIZE_MISMATCH);
+  }
+  this->offset = offset;
+}
+
+string ndarray::__str__() {
+  string o = "";
+  int *iter = create_list(this->dim_length);
+  if (this->dim_length == 0) {
+    o.append(to_string(this->at(END_OF_LIST)) + "\n");
+    return o;
+  } else if (this->dim_length == 1) {
+    o.append("[");
+    for (int i = 0; i < this->dim[0]; i++) {
+      iter[0] = i;
+      o.append(to_string(this->__at__(iter, 1)) + " ");
+    }
+    o.append("]");
+    return o;
+  } else {
+    o.append("[");
+    fill_elem_list(iter, this->dim_length, ALL);
+    for (int i = 0; i < this->dim[0]; i++) {
+      iter[0] = i;
+      o.append(this->__get_subndarray__(iter, this->dim_length)->__str__());
+      if (i != this->dim[0] - 1)
+        o.append("\n");
+    }
+    o.append("]");
+    return o;
   }
 }
 
@@ -59,15 +109,18 @@ ndarray *ndarray::__get_subndarray__(int *idxs, int l) {
   ndarray *o = this->clone();
   o->dim = reduce_list(this->dim, idxs, l);
   o->dim_length = count_elem_list(idxs, l, ALL);
+  o->size = prod_all_elements(o->dim, o->dim_length);
   o->strides_length = o->dim_length;
   o->strides = reduce_list(this->strides, idxs, l);
-  o->offset = list_dot_list(replace_elem_list(idxs, l, ALL, 0), this->dim, l);
+  o->offset =
+      list_dot_list(replace_elem_list(idxs, l, ALL, 0), this->strides, l);
 
   return o;
 }
 
 void ndarray::__set_subndarray__(ndarray *arr, int *idxs, int l) {
   ndarray *o = this->__get_subndarray__(idxs, l);
+  cout << "offset :" << o->offset << endl;
   int *limit = o->dim;
   int sl = o->dim_length;
   int *iter = create_list(sl);
@@ -80,21 +133,25 @@ void ndarray::__set_subndarray__(ndarray *arr, int *idxs, int l) {
 // Convert strided index into flat index
 int ndarray::flat_index(int idx) {
   // TODO? Now it is just returning the same index;
+  // Fix offset?
   return idx;
 }
 
 // Accessing to the flat version of this ndarray
-double ndarray::flat(int idx) { return this->data[this->flat_index(idx)]; }
+double ndarray::flat(int idx) {
+  // TODO? Fix offset?
+  return this->data[this->offset + this->flat_index(idx)];
+}
 
 // Clonning an array
 ndarray *ndarray::clone() {
-  ndarray *arr = new ndarray(this->data, this->size);
-  arr->__set_strides__(this->strides, this->strides_length);
-  return arr;
+  return new ndarray(this->data, this->size, this->dim, this->dim_length,
+                     this->offset);
 }
 
 // Getting the element at an specific indexes
 double ndarray::at(int idx, ...) {
+  // TODO? Fix offset?
   int l;
   int *idxs;
   va_list vl;
@@ -118,7 +175,7 @@ double ndarray::__at__(int *idxs, int l) {
     assert_error(OUTSIDE_RANGE);
   }
 
-  real_idx = this->offset + list_dot_list(idxs, this->strides, l);
+  real_idx = list_dot_list(idxs, this->strides, l);
 
   if (real_idx >= this->size) {
     // ERROR
@@ -141,8 +198,9 @@ void ndarray::set(double val, int idx, ...) {
 }
 
 void ndarray::__set__(double val, int *idxs, int l) {
+  // TODO? fix offset?
   int strided_idx = list_dot_list(idxs, this->strides, l);
-  this->data[this->flat_index(strided_idx)] = val;
+  this->data[this->offset + this->flat_index(strided_idx)] = val;
 }
 
 // Get the sub ndarray at the specific indexes
@@ -179,35 +237,13 @@ int *ndarray::shape() {
 }
 
 // Set strides of the ndarray
-void ndarray::set_strides(int s,
-                          ...) { // Just an interface when having args ...
-  int *strides;
-  int l;
-  va_list vl;
-
-  va_start(vl, s);
-  strides = args_to_list(vl, s, &l);
-  va_end(vl);
-  this->__set_strides__(strides, l);
-}
-
-// Set strides of the ndarray
-void ndarray::__set_strides__(int *s, int l) {
-  int prod = prod_all_elements(s, l);
-
-  if (this->size % prod) {
-    // ERROR
-    assert_error(STRIDES_SIZE_MISMATCH);
-  }
-
-  if (l > MAX_NUM_DIM) {
-    // ERROR
-    assert_error(EXCEED_MAX_NUM_DIM);
-  }
-
-  this->strides = s;
+void ndarray::__as_strided__(int *new_strides, int *new_shape, int l) {
+  /*******************************************/
+  /* WARNING: Be careful using this function */
+  /*******************************************/
+  this->strides = new_strides;
   this->strides_length = l;
-  this->dim = shift_right(s, l, this->size / prod);
+  this->dim = new_shape;
   this->dim_length = l;
 }
 
@@ -240,7 +276,7 @@ void ndarray::__reshape__(int *s, int l) {
 
   this->dim = s;
   this->dim_length = l;
-  this->strides = shift_left(s, l, 1);
+  this->strides = get_strides_from_shape(s, l);
   this->strides_length = l;
 }
 
