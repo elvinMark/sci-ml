@@ -1,5 +1,4 @@
 #include <sciml/data/ndarray.hpp>
-#include <sciml/data/random.hpp>
 #include <sciml/utils/useful_functions.hpp>
 
 using namespace std;
@@ -22,6 +21,7 @@ int main() {
   // d3 = d1->get_subndarray(1, ALL, 3, -2);
   // d3 = d1->get_subndarray(ALL, ALL, 1, -2)->dot(d2)->mean(0, -2);
   // cout << d3->at(0, -2) << endl;
+  d1 = ndarray::random(3, 3, 5, END_OF_LIST);
   cout << d1->__str__() << endl;
   // for (int i = 0; i < 3; i++) {
   //   for (int j = 0; j < 3; j++)

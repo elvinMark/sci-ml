@@ -1,7 +1,8 @@
 #ifndef LINALG
 #define LINALG
 
-ndarray *__det__(ndarray *arr);
+ndarray **__lu__(ndarray *arr);
+double __det__(ndarray *arr);
 ndarray *__inv__(ndarray *arr);
 ndarray **__qr__(ndarray *arr);
 ndarray **__eig__(ndarray *arr);

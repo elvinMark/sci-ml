@@ -7,6 +7,9 @@
 #define TRUE 1
 #define MAX_NUM_DIM 5
 #define AVAIL_NUM_INDEXES 10
+#define DEFAULT -1
+#define EIG_MAX_ITER 20
+#define DIM_2
 
 #define DIM_SIZE_MISMATCH 2
 #define NOT_ENOUGH_INDEXES 3
@@ -18,5 +21,6 @@
 #define COMMON_IDX_SIZE_MISMATCH 9
 #define IDX_DIM_MISMATCH 10
 #define DIM_TOO_HIGH 11
+#define DIM_NOT_EXPECTED 12
 
 #endif

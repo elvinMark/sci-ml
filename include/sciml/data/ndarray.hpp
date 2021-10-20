@@ -4,6 +4,7 @@
 #include <math.h>
 #include <stdarg.h>
 #include <stdlib.h>
+#include <time.h>
 
 using namespace std;
 
@@ -18,6 +19,7 @@ public:
   int offset;
 
 public:
+  ndarray(int *dim, int l);
   ndarray(double *data, int size);
   ndarray(double *data, int size, int *dim, int l);
   ndarray(double *data, int size, int *dim, int l, int offset);
@@ -50,6 +52,18 @@ public:
   ndarray *sum(int axis, ...);
   ndarray *mean(int axis, ...);
   ndarray *std(int axis, ...);
+
+  static ndarray *__random__(int *d, int l);
+  static ndarray *random(int d, ...);
+
+  static ndarray *__zeros__(int *d, int l);
+  static ndarray *zeros(int d, ...);
+
+  static ndarray *__ones__(int *d, int l);
+  static ndarray *ones(int d, ...);
+
+  static ndarray *eye(int d);
+  static ndarray *eye(int r, int c);
 
   static ndarray *add(ndarray *arr1, ndarray *arr2);
   static ndarray *add(ndarray *arr1, double num);

@@ -2,11 +2,21 @@
 #include <sciml/utils/constants.hpp>
 #include <sciml/utils/useful_functions.hpp>
 
+ndarray::ndarray(int *dim, int l) {
+  this->dim = create_list(l);
+  this->dim_length = l;
+  this->strides = get_strides_from_shape(this->dim, l);
+  this->strides_length = l;
+  this->size = prod_all_elements(dim, l);
+  this->data = (double *)malloc(sizeof(double) * this->size);
+  this->offset = 0;
+}
+
 // Constructor of the n-dimensional array
 ndarray::ndarray(double *data, int size) {
   this->data = data;
   this->size = size;
-  this->dim = (int *)malloc(sizeof(int));
+  this->dim = create_list(1);
   this->dim_length = 1;
   this->dim[0] = size;
   this->strides = get_strides_from_shape(this->dim, 1);
@@ -590,8 +600,108 @@ ndarray *ndarray::mean(ndarray *arr1, int *axis, int l) {
 }
 
 ndarray *ndarray::std(ndarray *arr1, int *axis, int l) {
-  // TODO
   ndarray *arr_2_mean = ndarray::mean(ndarray::power(arr1, 2), axis, l);
   ndarray *arr_mean_2 = ndarray::power(ndarray::mean(arr1, axis, l), 2);
   return ndarray::power(ndarray::sub(arr_2_mean, arr_mean_2), 0.5);
+}
+
+ndarray *ndarray::random(int d, ...) {
+  va_list vl;
+  int l;
+  int *dim;
+
+  va_start(vl, d);
+  dim = args_to_list(vl, d, &l);
+  va_end(vl);
+
+  return ndarray::__random__(dim, l);
+}
+
+ndarray *ndarray::__random__(int *d, int l) {
+  int size = prod_all_elements(d, l);
+  double *data = (double *)malloc(sizeof(double) * size);
+  int i;
+
+  srand(time(NULL));
+
+  for (i = 0; i < size; i++)
+    data[i] = rand() % 10000 / 10000.0;
+
+  return new ndarray(data, size, d, l);
+}
+
+ndarray *ndarray::zeros(int d, ...) {
+  va_list vl;
+  int l;
+  int *dim;
+
+  va_start(vl, d);
+  dim = args_to_list(vl, d, &l);
+  va_end(vl);
+
+  return ndarray::__zeros__(dim, l);
+}
+
+ndarray *ndarray::__zeros__(int *d, int l) {
+  int size = prod_all_elements(d, l);
+  double *data = (double *)malloc(sizeof(double) * size);
+  int i;
+
+  for (i = 0; i < size; i++)
+    data[i] = 0;
+
+  return new ndarray(data, size, d, l);
+}
+
+ndarray *ndarray::ones(int d, ...) {
+  va_list vl;
+  int l;
+  int *dim;
+
+  va_start(vl, d);
+  dim = args_to_list(vl, d, &l);
+  va_end(vl);
+
+  return ndarray::__ones__(dim, l);
+}
+
+ndarray *ndarray::__ones__(int *d, int l) {
+  int size = prod_all_elements(d, l);
+  double *data = (double *)malloc(sizeof(double) * size);
+  int i;
+
+  for (i = 0; i < size; i++)
+    data[i] = 1;
+
+  return new ndarray(data, size, d, l);
+}
+
+ndarray *ndarray::eye(int d) {
+  int *dim = create_list(2);
+  int size = d * d;
+  double *data = (double *)malloc(sizeof(double) * size);
+
+  dim[0] = d;
+  dim[1] = d;
+
+  for (int i = 0; i < d; i++)
+    for (int j = 0; j < d; j++)
+      data[i * d + j] = i == j ? 1 : 0;
+
+  return new ndarray(data, size, dim, 2);
+}
+
+ndarray *ndarray::eye(int r, int c) {
+  int *dim = create_list(2);
+  int size = r * c;
+  double *data = (double *)malloc(sizeof(double) * size);
+
+  dim[0] = r;
+  dim[1] = c;
+
+  for (int i = 0; i < r; i++)
+    for (int j = 0; j < c; j++)
+      data[i * r + j] = i == j ? 1 : 0;
+
+  return new ndarray(data, size, dim, 2);
 }

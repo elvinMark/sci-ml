@@ -232,6 +232,8 @@ void assert_error(int error_code) {
     cout << "ERROR: Index does not match the dimension of the ndarray" << endl;
   else if (error_code == DIM_TOO_HIGH)
     cout << "ERROR: Dimension of the ndarray is too high" << endl;
+  else if (error_code == DIM_NOT_EXPECTED)
+    cout << "ERROR: Dimension not as expected" << endl;
   else
     cout << "ERROR: Unknown";
   exit(-1);
