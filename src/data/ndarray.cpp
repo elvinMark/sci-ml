@@ -3,7 +3,7 @@
 #include <sciml/utils/useful_functions.hpp>
 
 ndarray::ndarray(int *dim, int l) {
-  this->dim = create_list(l);
+  this->dim = dim;
   this->dim_length = l;
   this->strides = get_strides_from_shape(this->dim, l);
   this->strides_length = l;
