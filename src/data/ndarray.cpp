@@ -30,7 +30,7 @@ ndarray::ndarray(double *data, int size, int *dim, int l) {
   this->size = size;
   this->dim = dim;
   this->dim_length = l;
-
+  this->offset = 0;
   if (l > MAX_NUM_DIM) {
     // ERROR
     assert_error(EXCEED_MAX_NUM_DIM);
@@ -74,10 +74,14 @@ string ndarray::__str__() {
     o.append(to_string(this->at(END_OF_LIST)) + "\n");
     return o;
   } else if (this->dim_length == 1) {
-    o.append("[");
+    o.append("[ ");
     for (int i = 0; i < this->dim[0]; i++) {
       iter[0] = i;
-      o.append(to_string(this->__at__(iter, 1)) + " ");
+      o.append(to_string(this->__at__(iter, 1)));
+      if (i != this->dim[0] - 1)
+        o.append("\t");
+      else
+        o.append(" ");
     }
     o.append("]");
     return o;
@@ -90,7 +94,7 @@ string ndarray::__str__() {
       if (i != this->dim[0] - 1)
         o.append("\n");
     }
-    o.append("]");
+    o.append("]\n");
     return o;
   }
 }
@@ -122,15 +126,14 @@ ndarray *ndarray::__get_subndarray__(int *idxs, int l) {
   o->size = prod_all_elements(o->dim, o->dim_length);
   o->strides_length = o->dim_length;
   o->strides = reduce_list(this->strides, idxs, l);
-  o->offset =
-      list_dot_list(replace_elem_list(idxs, l, ALL, 0), this->strides, l);
+  o->offset = this->offset + list_dot_list(replace_elem_list(idxs, l, ALL, 0),
+                                           this->strides, l);
 
   return o;
 }
 
 void ndarray::__set_subndarray__(ndarray *arr, int *idxs, int l) {
   ndarray *o = this->__get_subndarray__(idxs, l);
-  cout << "offset :" << o->offset << endl;
   int *limit = o->dim;
   int sl = o->dim_length;
   int *iter = create_list(sl);
