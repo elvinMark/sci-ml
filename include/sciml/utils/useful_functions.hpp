@@ -11,6 +11,7 @@ using namespace std;
 // List Related Functions
 int *create_list(int l);
 int *random_list(int lo, int hi, int l);
+void copy_list_to_list(int *from, int *to, int l);
 void print_list(int *arr, int l);
 void fill_zeros_list(int *arr, int l);
 void fill_elem_list(int *arr, int l, int elem);

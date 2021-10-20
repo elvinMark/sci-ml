@@ -2,6 +2,7 @@
 #define CONSTANTS
 
 #define END_OF_LIST -2
+#define END -2
 #define ALL -1
 #define FALSE 0
 #define TRUE 1

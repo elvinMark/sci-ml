@@ -14,6 +14,11 @@ int *random_list(int lo, int hi, int l) {
   return o;
 }
 
+void copy_list_to_list(int *from, int *to, int l) {
+  for (int i = 0; i < l; i++)
+    to[i] = from[i];
+}
+
 void print_list(int *arr, int l) {
   for (int i = 0; i < l; i++)
     cout << arr[i] << " ";

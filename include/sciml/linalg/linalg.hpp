@@ -6,6 +6,7 @@
 
 ndarray **__lu__(ndarray *arr);
 double __det__(ndarray *arr);
+ndarray *__solve__(ndarray *arr, ndarray *b);
 ndarray *__inv__(ndarray *arr);
 ndarray **__qr__(ndarray *arr);
 ndarray **__eig__(ndarray *arr);

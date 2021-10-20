@@ -1,7 +1,6 @@
 #include <sciml/linalg/linalg.hpp>
 
 ndarray **__lu__(ndarray *arr) {
-  // TODO
   if (arr->dim_length != 2) {
     // ERROR
     assert_error(DIM_TOO_HIGH);
@@ -83,9 +82,69 @@ double __det__(ndarray *arr) {
   return ans;
 }
 
+ndarray *__solve__(ndarray *arr, ndarray *b) {
+  if (arr->dim_length != 2 || b->dim_length != 2) {
+    // ERROR
+    assert_error(DIM_TOO_HIGH);
+  }
+
+  if (arr->dim[0] != arr->dim[1] || arr->dim[0] != b->dim[0]) {
+    // ERROR
+    assert_error(DIM_NOT_EXPECTED);
+  }
+
+  int d = arr->dim[0];
+  int *iter_arr = create_list(2);
+  int *iter_z = create_list(2);
+  ndarray **_lu = __lu__(arr);
+  ndarray *_l, *_u;
+  ndarray *_sol = new ndarray(b->dim, b->dim_length);
+  ndarray *_z = new ndarray(b->dim, b->dim_length);
+  double s;
+
+  _l = _lu[0];
+  _u = _lu[1];
+
+  // Solving L * z = b
+  // for each row
+  for (int i = 0; i < b->dim[1]; i++) {
+    for (int j = 0; j < b->dim[0]; j++) {
+      s = 0;
+      iter_arr[0] = j;
+      iter_z[1] = i;
+      for (int k = 0; k < j; k++) {
+        iter_arr[1] = k;
+        iter_z[0] = k;
+        s += _l->__at__(iter_arr, 2) * _z->__at__(iter_z, 2);
+      }
+      iter_z[0] = j;
+      _z->__set__(b->__at__(iter_z, 2) - s, iter_z, 2);
+    }
+  }
+
+  // Solving U * sol = z
+  for (int i = 0; i < _z->dim[1]; i++) {
+    for (int j = _z->dim[0] - 1; j >= 0; j--) {
+      s = 0;
+      iter_arr[0] = j;
+      iter_z[1] = i;
+      for (int k = j + 1; k < _z->dim[0]; k++) {
+        iter_arr[1] = k;
+        iter_z[0] = k;
+        s += _u->__at__(iter_arr, 2) * _sol->__at__(iter_z, 2);
+      }
+      iter_z[0] = j;
+      iter_arr[1] = j;
+      _sol->__set__((_z->__at__(iter_z, 2) - s) / _u->__at__(iter_arr, 2),
+                    iter_z, 2);
+    }
+  }
+
+  return _sol;
+}
+
 ndarray *__inv__(ndarray *arr) {
   // Inverse of a nxn matrix (2-dim ndarray)
-  // TODO
   if (arr->dim_length != 2) {
     // ERROR
     assert_error(DIM_TOO_HIGH);
@@ -96,15 +155,16 @@ ndarray *__inv__(ndarray *arr) {
     assert_error(DIM_NOT_EXPECTED);
   }
 
-  int n = arr->dim[0];
-  int *iter = create_list(2);
-  ndarray **_lu = __lu__(arr);
-  ndarray *_inv = new ndarray(arr->dim, arr->dim_length);
+  int d = arr->dim[0];
+  ndarray *I = ndarray::eye(d);
 
-  return NULL;
+  return __solve__(arr, I);
 }
 
-ndarray **__qr__(ndarray *arr) { return NULL; }
+ndarray **__qr__(ndarray *arr) {
+  // TODO
+  return NULL;
+}
 
 ndarray **__eig__(ndarray *arr, int maxIter) {
   // Calculate the eigenvalues of a nxn matrix (2-dim ndarray)
@@ -123,7 +183,7 @@ ndarray **__eig__(ndarray *arr, int maxIter) {
   ndarray **_qr;
   ndarray *_q, *_r;
   ndarray *_eig_vecs;
-  ndarray *out[2];
+  ndarray **out = (ndarray **)malloc(sizeof(ndarray *) * 2);
 
   _eig_vecs = ndarray::eye(arr->dim[0]);
 
@@ -145,26 +205,59 @@ ndarray **__eig__(ndarray *arr, int maxIter) {
 }
 
 ndarray *det(ndarray *arr) {
-  // TODO
   int l = arr->dim_length - 2;
   int *new_dim = sublist(0, l, arr->dim, arr->dim_length);
   int new_size = prod_all_elements(new_dim, l);
   double *new_data = (double *)malloc(sizeof(double) * new_size);
   ndarray *o = new ndarray(new_data, new_size, new_dim, l);
-  int *iter = create_list(l);
+  int *iter = create_list(arr->dim_length);
+  int *new_iter = create_list(l);
   ndarray *tmp;
 
-  fill_zeros_list(iter, l);
-
+  fill_zeros_list(new_iter, l);
+  fill_elem_list(iter, arr->dim_length, ALL);
   do {
-    // tmp = arr->__get_subndarray__()
-  } while (!increase_list_by_one(iter, new_dim, l));
+    // Get nxn subndarray
+    copy_list_to_list(new_iter, iter, l);
+    tmp = arr->__get_subndarray__(iter, arr->dim_length);
+    // Calculate the det of the subndarray and set the value in the major
+    // ndarray
+    o->__set__(__det__(tmp), new_iter, l);
+  } while (!increase_list_by_one(new_iter, new_dim, l));
 
   return o;
 }
 
-ndarray *inv(ndarray *arr) { return NULL; }
+ndarray *inv(ndarray *arr) {
+  int l = arr->dim_length - 2;
+  int *new_dim = sublist(0, l, arr->dim, arr->dim_length);
+  int new_size = prod_all_elements(new_dim, l);
+  ndarray *o = new ndarray(arr->dim, arr->dim_length);
+  int *iter = create_list(arr->dim_length);
+  int *new_iter = create_list(l);
+  ndarray *tmp;
 
-ndarray **qr(ndarray *arr) { return NULL; }
+  fill_zeros_list(new_iter, l);
+  fill_elem_list(iter, arr->dim_length, ALL);
 
-ndarray **eig(ndarray *arr) { return NULL; }
+  do {
+    // Get nxn subndarray
+    copy_list_to_list(new_iter, iter, l);
+    tmp = arr->__get_subndarray__(iter, arr->dim_length);
+    // Calculate the inv of the subndarray and set the value in the major
+    // ndarray
+    o->__set_subndarray__(__inv__(tmp), iter, arr->dim_length);
+  } while (!increase_list_by_one(new_iter, new_dim, l));
+
+  return o;
+}
+
+ndarray **qr(ndarray *arr) {
+  // TODO
+  return NULL;
+}
+
+ndarray **eig(ndarray *arr) {
+  // TODO
+  return NULL;
+}
