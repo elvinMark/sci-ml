@@ -163,7 +163,17 @@ ndarray *__inv__(ndarray *arr) {
 
 ndarray **__qr__(ndarray *arr) {
   // TODO
-  return NULL;
+  ndarray *_q;
+  ndarray *_r;
+  ndarray **o = (ndarray **)malloc(sizeof(ndarray *) * 2);
+
+  _q = new ndarray(arr->dim, arr->dim_length);
+  _r = new ndarray(arr->dim, arr->dim_length);
+
+  o[0] = _q;
+  o[1] = _r;
+
+  return o;
 }
 
 ndarray **__eig__(ndarray *arr, int maxIter) {
